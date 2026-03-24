@@ -18,6 +18,7 @@ public class ProductRest {
     @Autowired
     ProductService productService;
 
+    @PostMapping
     public ResponseEntity<Product> save(@RequestBody Product p){
         Product productResponse = productService.saveProduct(p);
         try {
