@@ -5,7 +5,6 @@ import market.entity.Product;
 import market.service.ProductService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,8 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -78,17 +76,34 @@ class ProductRestIntegrationTest {
     void updateProduct() throws Exception {
         Product p = createProduct();
         p.setName("Prueba");
-        mockMvc.perform(put("/product/1")
+        p.setDescription("Descripcion");
+        p.setPrice(20);
+        p.setStock(5);
+        mockMvc.perform(put("/product/"+product.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(p)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Prueba"));
+                .andExpect(jsonPath("$.name").value("Prueba"))
+                .andExpect(jsonPath("$.description").value("Descripcion"))
+                .andExpect(jsonPath("$.price").value(20.0))
+                .andExpect(jsonPath("$.stock").value(5));
+    }
+
+    @Test
+    void updateProductNotFound() throws Exception {
+        mockMvc.perform(put("/product/999999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createProduct())))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void deleteProductById() throws Exception{
-        mockMvc.perform(delete("/product/1"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/product/"+product.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Producto eliminado exitosamente"));
+
+        assertTrue(productService.findById(product.getId()).isEmpty());
     }
 
     @Test
@@ -102,5 +117,11 @@ class ProductRestIntegrationTest {
         mockMvc.perform(get("/product/"+product.getId()))
                 .andExpect(jsonPath("$.id").value(product.getId()))
                 .andExpect(jsonPath("$.name").value("Test"));
+    }
+
+    @Test
+    void findProductByIdNotFound() throws Exception {
+        mockMvc.perform(get("/product/999999"))
+                .andExpect(status().isNotFound());
     }
 }

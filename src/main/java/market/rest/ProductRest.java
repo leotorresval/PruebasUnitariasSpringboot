@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +20,7 @@ public class ProductRest {
     @PostMapping
     public ResponseEntity<Product> save(@RequestBody Product p){
         Product productResponse = productService.saveProduct(p);
-        try {
-            return ResponseEntity.created(new URI("/product/"+productResponse.getId())).body(productResponse);
-        } catch (URISyntaxException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.created(URI.create("/product/"+productResponse.getId())).body(productResponse);
     }
     @PutMapping("{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable long id, @RequestBody Product updatedProduct) {

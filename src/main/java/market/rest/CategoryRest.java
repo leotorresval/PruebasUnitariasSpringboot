@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +20,7 @@ public class CategoryRest {
     @PostMapping
     public ResponseEntity<Category> save(@RequestBody Category c){
         Category categoryResponse = categoryService.saveCategory(c);
-        try {
-            return ResponseEntity.created(new URI("/category/"+categoryResponse.getId())).body(categoryResponse);
-        } catch (URISyntaxException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.created(URI.create("/category/"+categoryResponse.getId())).body(categoryResponse);
     }
 
     @PutMapping("{id}")
